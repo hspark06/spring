@@ -8,6 +8,10 @@ public class UserDao {
    
 	private ConnectionMaker connectionMaker;
 
+	public UserDao(ConnectionMaker simpleConnectionMaker) {
+		this.connectionMaker = simpleConnectionMaker;
+	}
+	
 	public void setConnectionMaker(ConnectionMaker simpleConnectionMaker) {
 		this.connectionMaker = simpleConnectionMaker;
 	}
