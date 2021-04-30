@@ -1,21 +1,29 @@
 package com.ennio.main.chapter1.dao;
 
+import javax.sql.DataSource;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 @Configuration
 public class DaoFactory {
-    //오브젝트 생성을 담당하는 IoC용 메소드라는 표시
-	@Bean
-	public UserDao userDao() {
-		UserDao dao = new UserDao(connectionMaker());
-		//dao.setConnectionMaker(connectionMaker());
-		return dao;
+    @Bean
+	public DataSource dataSource() {
+		SimpleDriverDataSource dataSource = new SimpleDriverDataSource ();
+
+		dataSource.setDriverClass(org.h2.Driver.class);
+		dataSource.setUrl("jdbc:h2:tcp://localhost/~/test");
+		dataSource.setUsername("user");
+		dataSource.setPassword("dsic");
+
+		return dataSource;
 	}
 
 	@Bean
-	public ConnectionMaker connectionMaker() {
-		ConnectionMaker connectionMaker = new DConnectionMaker();
-		return connectionMaker;
+	public UserDao userDao() {
+		UserDao userDao = new UserDao();
+		userDao.setDataSource(dataSource());
+		return userDao;
 	}
 }

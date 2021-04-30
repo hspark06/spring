@@ -1,27 +1,23 @@
 package com.ennio.main.chapter1.dao;
 
 import java.sql.*;
+import javax.sql.DataSource;
 
 import com.ennio.main.chapter1.domain.User;
 
 public class UserDao {
    
-	private ConnectionMaker connectionMaker;
+	private DataSource dataSource;
 
-	public UserDao(ConnectionMaker simpleConnectionMaker) {
-		this.connectionMaker = simpleConnectionMaker;
-	}
-	
-	public void setConnectionMaker(ConnectionMaker simpleConnectionMaker) {
-		this.connectionMaker = simpleConnectionMaker;
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 
-    public void add(User user) throws ClassNotFoundException, SQLException {
-		
-		Connection c = this.connectionMaker.makeConnection();
-        //Connection c = getConnection();
-		
-		PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values (?, ?, ?)");
+    public void add(User user) throws SQLException {
+		Connection c = this.dataSource.getConnection();
+
+		PreparedStatement ps = c.prepareStatement(
+			"insert into users(id, name, password) values(?,?,?)");
 		ps.setString(1, user.getId());
 		ps.setString(2, user.getName());
 		ps.setString(3, user.getPassword());
@@ -32,17 +28,14 @@ public class UserDao {
 		c.close();
 	}
 
-	public User get(String id) throws ClassNotFoundException, SQLException {
-		
-		Connection c = this.connectionMaker.makeConnection();
-		//Connection c = getConnection();
-
-		PreparedStatement ps = c.prepareStatement("select * from users where id = ?");
+	public User get(String id) throws SQLException {
+		Connection c = this.dataSource.getConnection();
+		PreparedStatement ps = c
+				.prepareStatement("select * from users where id = ?");
 		ps.setString(1, id);
 
 		ResultSet rs = ps.executeQuery();
 		rs.next();
-
 		User user = new User();
 		user.setId(rs.getString("id"));
 		user.setName(rs.getString("name"));
@@ -54,10 +47,30 @@ public class UserDao {
 
 		return user;
 	}
-	/*
-    private Connection getConnection() throws ClassNotFoundException, SQLException {
-		Class.forName("org.h2.Driver");
-		return DriverManager.getConnection("jdbc:h2:tcp://localhost/~/test", "user", "dsic");
+	
+	public void deleteAll() throws SQLException {
+		Connection c = dataSource.getConnection();
+	
+		PreparedStatement ps = c.prepareStatement("delete from users");
+		ps.executeUpdate();
+
+		ps.close();
+		c.close();
+	}	
+
+	public int getCount() throws SQLException  {
+		Connection c = dataSource.getConnection();
+	
+		PreparedStatement ps = c.prepareStatement("select count(*) from users");
+
+		ResultSet rs = ps.executeQuery();
+		rs.next();
+		int count = rs.getInt(1);
+
+		rs.close();
+		ps.close();
+		c.close();
+	
+		return count;
 	}
-	*/
 }
