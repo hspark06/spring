@@ -4,31 +4,26 @@ import java.sql.*;
 import javax.sql.DataSource;
 
 import com.ennio.main.chapter1.domain.User;
-
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 public class UserDao {
    
 	private DataSource dataSource;
-
+	private JdbcTemplate jdbcTemplate;
+		
 	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate();
+		this.jdbcTemplate.setDataSource(dataSource);
+
 		this.dataSource = dataSource;
 	}
-
-    public void add(User user) throws SQLException {
-		Connection c = this.dataSource.getConnection();
-
-		PreparedStatement ps = c.prepareStatement(
-			"insert into users(id, name, password) values(?,?,?)");
-		ps.setString(1, user.getId());
-		ps.setString(2, user.getName());
-		ps.setString(3, user.getPassword());
-
-		ps.executeUpdate();
-
-		ps.close();
-		c.close();
+	
+	public void add(final User user) throws SQLException {
+		this.jdbcTemplate.update("insert into users(id, name, password) values(?,?,?)",
+						user.getId(), user.getName(), user.getPassword());
 	}
+
 
 	public User get(String id) throws SQLException {
 		Connection c = this.dataSource.getConnection();
@@ -54,16 +49,10 @@ public class UserDao {
 
 		return user;
 	}
-	
-	public void deleteAll() throws SQLException {
-		Connection c = dataSource.getConnection();
-	
-		PreparedStatement ps = c.prepareStatement("delete from users");
-		ps.executeUpdate();
 
-		ps.close();
-		c.close();
-	}	
+	public void deleteAll() throws SQLException {
+		this.jdbcTemplate.update("delete from users");
+	}
 
 	public int getCount() throws SQLException  {
 		Connection c = dataSource.getConnection();
