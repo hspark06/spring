@@ -2,10 +2,11 @@ package com.ennio.main.chapter1.dao;
 
 import java.sql.*;
 import javax.sql.DataSource;
-
+import java.util.List;
 import com.ennio.main.chapter1.domain.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 
 public class UserDao {
    
@@ -24,31 +25,20 @@ public class UserDao {
 						user.getId(), user.getName(), user.getPassword());
 	}
 
-
-	public User get(String id) throws SQLException {
-		Connection c = this.dataSource.getConnection();
-		PreparedStatement ps = c
-				.prepareStatement("select * from users where id = ?");
-		ps.setString(1, id);
-		
-		ResultSet rs = ps.executeQuery();
-
-		User user = null;
-		if (rs.next()) {
-			user = new User();
-			user.setId(rs.getString("id"));
-			user.setName(rs.getString("name"));
-			user.setPassword(rs.getString("password"));
-		}
-
-		rs.close();
-		ps.close();
-		c.close();
-		
-		if (user == null) throw new EmptyResultDataAccessException(1);
-
-		return user;
-	}
+	public User get(String id) {
+		return this.jdbcTemplate.queryForObject("select * from users where id = ?",
+				new Object[] {id}, 
+				new RowMapper<User>() {
+					public User mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						User user = new User();
+						user.setId(rs.getString("id"));
+						user.setName(rs.getString("name"));
+						user.setPassword(rs.getString("password"));
+						return user;
+					}
+				});
+	} 
 
 	public void deleteAll() throws SQLException {
 		this.jdbcTemplate.update("delete from users");
@@ -68,5 +58,19 @@ public class UserDao {
 		c.close();
 	
 		return count;
+	}
+
+	public List<User> getAll() {
+		return this.jdbcTemplate.query("select * from users order by id",
+				new RowMapper<User>() {
+					public User mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						User user = new User();
+						user.setId(rs.getString("id"));
+						user.setName(rs.getString("name"));
+						user.setPassword(rs.getString("password"));
+						return user;
+					}
+				});
 	}
 }
