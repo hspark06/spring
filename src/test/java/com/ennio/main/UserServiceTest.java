@@ -1,5 +1,5 @@
 package com.ennio.main;
-import org.junit.jupiter.api.Assertions;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,19 +15,11 @@ import com.ennio.main.chapter4.service.UserService;
 import static com.ennio.main.chapter4.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
 import static com.ennio.main.chapter4.service.UserService.MIN_RECCOMEND_FOR_GOLD;
 
-import java.sql.SQLException;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.sql.DataSource;
 
 @ExtendWith(SpringExtension.class) 
 @ContextConfiguration(locations="/com/ennio/main/chapter1/applicationContext.xml")
