@@ -1,6 +1,5 @@
 package com.ennio.main;
 
-import org.h2.jdbc.JdbcSQLNonTransientException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.ennio.main.chapter4.UserDao;
-import com.ennio.main.chapter1.domain.User;
+import com.ennio.main.chapter4.domain.Level;
+import com.ennio.main.chapter4.domain.User;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
@@ -42,9 +42,9 @@ public class UserDaoTest {
 	@BeforeAll
 	static public void setUp() {
 		
-		user1 = new User("gyumee", "111", "springno1");
-		user2 = new User("leegw700", "222", "springno2");
-		user3 = new User("bumjin", "333", "springno3");
+		user1 = new User("gyumee", "111", "springno1", Level.BASIC, 1, 0);
+		user2 = new User("leegw700", "222", "springno2", Level.SILVER, 55, 10);
+		user3 = new User("bumjin", "333", "springno3", Level.GOLD, 100, 40);
 	}
 
 	@Test

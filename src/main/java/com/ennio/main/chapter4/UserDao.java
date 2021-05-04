@@ -2,7 +2,7 @@ package com.ennio.main.chapter4;
 
 import java.util.List;
 
-import com.ennio.main.chapter1.domain.User;
+import com.ennio.main.chapter4.domain.User;
 
 public interface UserDao {
     

@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import com.ennio.main.chapter1.domain.User;
+import com.ennio.main.chapter4.domain.User;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
