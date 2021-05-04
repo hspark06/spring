@@ -15,7 +15,7 @@
 	<bean id="userDao" class="com.ennio.main.chapter4.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-	<bean id="userService" class="com.ennio.main.chapter4.UserService">
+	<bean id="userService" class="com.ennio.main.chapter4.service.UserService">
 		<property name="userDao" ref="userDao" />
 	</bean>
 </beans>
