@@ -2,7 +2,7 @@ package com.ennio.main;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -13,6 +13,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
+
 
 @ExtendWith(SpringExtension.class) 
 @ContextConfiguration(locations="/com/ennio/main/chapter6/applicationContext.xml")
@@ -32,12 +37,51 @@ public class DynamicProxyTest {
 				new Class[] { Hello.class},
 				new UppercaseHandler(new HelloTarget()));
 		
-		//Hello proxiedHello = new HelloUppercase(new HelloTarget());
+//		Hello proxiedHello = new HelloUppercase(new HelloTarget());
+		assertThat(proxiedHello.sayHello("Toby"), is("HELLO TOBY"));
+		assertThat(proxiedHello.sayHi("Toby"), is("HI TOBY"));
+		assertThat(proxiedHello.sayThankYou("Toby"), is("THANK YOU TOBY"));
+	}
+
+	@Test
+	public void proxyFactoryBean() {
+		ProxyFactoryBean pfBean = new ProxyFactoryBean();
+		pfBean.setTarget(new HelloTarget());
+		pfBean.addAdvice(new UppercaseAdvice());
+
+		Hello proxiedHello = (Hello) pfBean.getObject();
+		
 		assertThat(proxiedHello.sayHello("Toby"), is("HELLO TOBY"));
 		assertThat(proxiedHello.sayHi("Toby"), is("HI TOBY"));
 		assertThat(proxiedHello.sayThankYou("Toby"), is("THANK YOU TOBY"));
 	}
 	
+	@Test
+	public void pointcutAdvisor() {
+		
+		ProxyFactoryBean pfBean = new ProxyFactoryBean();
+		pfBean.setTarget(new HelloTarget());
+		
+		NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+		pointcut.setMappedName("sayH*"); 
+		
+		pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, new UppercaseAdvice()));
+		
+		Hello proxiedHello = (Hello) pfBean.getObject();
+		
+		assertThat(proxiedHello.sayHello("Toby"), is("HELLO TOBY"));
+		assertThat(proxiedHello.sayHi("Toby"), is("HI TOBY"));
+		assertThat(proxiedHello.sayThankYou("Toby"), is("Thank You Toby")); 
+	}
+
+	static class UppercaseAdvice implements MethodInterceptor {
+		
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			String ret = (String)invocation.proceed();
+			return ret.toUpperCase();
+		}
+	}
+
 	static class HelloUppercase implements Hello {
 		Hello hello;
 		

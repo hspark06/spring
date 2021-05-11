@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -18,6 +20,7 @@ import static org.mockito.Mockito.when;
 import com.ennio.main.chapter6.dao.UserDao;
 import com.ennio.main.chapter6.domain.Level;
 import com.ennio.main.chapter6.domain.User;
+import com.ennio.main.chapter6.service.TxProxyFactoryBean;
 import com.ennio.main.chapter6.service.UserService;
 import com.ennio.main.chapter6.service.UserServiceImpl;
 import com.ennio.main.chapter6.service.UserServiceTx;
@@ -50,6 +53,7 @@ public class UserServiceTestEx {
 	@Autowired DataSource dataSource;
 	@Autowired MailSender mailSender; 
 	@Autowired PlatformTransactionManager transactionManager;
+	@Autowired ApplicationContext context;
 	
 	private static List<User> users;	// test fixture
 	
@@ -119,9 +123,9 @@ public class UserServiceTestEx {
 		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel())); 
 		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
 	}
-	@Test
+	@Test @DirtiesContext
 	public void upgradeAllOrNothing() throws Exception {
-		
+		/*
 		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(userDao);
 		testUserService.setMailSender(mailSender);
@@ -141,6 +145,29 @@ public class UserServiceTestEx {
 		}
 		
 		checkLevelUpgraded(users.get(1), false);
+		*/
+
+		TestUserService testUserService = new TestUserService(users.get(3).getId());
+		testUserService.setUserDao(userDao);
+		testUserService.setMailSender(mailSender);
+		
+		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
+		txProxyFactoryBean.setTarget(testUserService);
+		UserService txUserService = (UserService) txProxyFactoryBean.getObject();
+				 
+		userDao.deleteAll();			  
+		for(User user : users) userDao.add(user);
+		
+		try {
+			txUserService.upgradeLevels();   
+			fail("TestUserServiceException expected"); 
+		}
+		catch(TestUserServiceException e) { 
+		}
+		
+		checkLevelUpgraded(users.get(1), false);
+
+	
 	}
 
 	@Test
