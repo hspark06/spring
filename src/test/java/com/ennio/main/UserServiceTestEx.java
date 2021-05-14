@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -49,7 +50,8 @@ public class UserServiceTestEx {
 
     @Autowired UserService userService;	
     @Autowired UserDao userDao;
-	@Autowired UserServiceImpl userServiceImpl;
+	//@Autowired UserServiceImpl userServiceImpl;
+	@Autowired UserService testUserService;
 	@Autowired DataSource dataSource;
 	@Autowired MailSender mailSender; 
 	@Autowired PlatformTransactionManager transactionManager;
@@ -123,51 +125,21 @@ public class UserServiceTestEx {
 		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel())); 
 		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
 	}
-	@Test @DirtiesContext
+	@Test	
 	public void upgradeAllOrNothing() throws Exception {
-		/*
-		TestUserService testUserService = new TestUserService(users.get(3).getId());
-		testUserService.setUserDao(userDao);
-		testUserService.setMailSender(mailSender);
 		
-		UserServiceTx txUserService = new UserServiceTx();
-		txUserService.setTransactionManager(transactionManager);
-		txUserService.setUserService(testUserService);
-		 
 		userDao.deleteAll();			  
 		for(User user : users) userDao.add(user);
-		
-		try {
-			txUserService.upgradeLevels();   
-			fail("TestUserServiceException expected"); 
-		}
-		catch(TestUserServiceException e) { 
-		}
-		
-		checkLevelUpgraded(users.get(1), false);
-		*/
-
-		TestUserService testUserService = new TestUserService(users.get(3).getId());
-		testUserService.setUserDao(userDao);
-		testUserService.setMailSender(mailSender);
-		
-		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
-		txProxyFactoryBean.setTarget(testUserService);
-		UserService txUserService = (UserService) txProxyFactoryBean.getObject();
-				 
-		userDao.deleteAll();			  
-		for(User user : users) userDao.add(user);
-		
-		try {
-			txUserService.upgradeLevels();   
-			fail("TestUserServiceException expected"); 
-		}
-		catch(TestUserServiceException e) { 
-		}
-		
-		checkLevelUpgraded(users.get(1), false);
-
 	
+		try {
+			testUserService.upgradeLevels();   
+			fail("TestUserServiceException expected"); 
+		}
+		catch(TestUserServiceException e) { 
+		}
+		
+		checkLevelUpgraded(users.get(1), false);
+
 	}
 
 	@Test
@@ -240,13 +212,9 @@ public class UserServiceTestEx {
 		}
 	}
 
-	static class TestUserService extends UserServiceImpl {
-		private String id;
+	static class TestUserServiceImpl extends UserServiceImpl {
+		private String id = "madnite1"; // users(3).getId()
 		
-		private TestUserService(String id) {  
-			this.id = id;
-		}
-
 		protected void upgradeLevel(User user) {
 			if (user.getId().equals(this.id)) throw new TestUserServiceException();  
 			super.upgradeLevel(user);  

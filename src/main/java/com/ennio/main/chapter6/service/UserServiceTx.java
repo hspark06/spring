@@ -1,5 +1,7 @@
 package com.ennio.main.chapter6.service;
 
+import java.util.List;
+
 import com.ennio.main.chapter6.domain.User;
 
 import org.springframework.transaction.PlatformTransactionManager;
@@ -36,4 +38,8 @@ public class UserServiceTx implements UserService {
 			throw e;
 		}
 	}
+	public void deleteAll() { 	userService.deleteAll(); }
+	public User get(String id) { return userService.get(id); }
+	public List<User> getAll() { return userService.getAll(); }
+	public void update(User user) { userService.update(user); }
 }
