@@ -9,9 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.ennio.main.chapter4.UserDao;
-import com.ennio.main.chapter4.domain.Level;
-import com.ennio.main.chapter4.domain.User;
+import com.ennio.main.chapter7.dao.UserDao;
+import com.ennio.main.chapter7.domain.Level;
+import com.ennio.main.chapter7.domain.User;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
@@ -26,9 +26,9 @@ import java.util.List;
 import javax.sql.DataSource;
 
 @ExtendWith(SpringExtension.class) 
-@ContextConfiguration(locations="/com/ennio/main/chapter1/applicationContext.xml")
+@ContextConfiguration(locations="/com/ennio/main/chapter7/applicationContext.xml")
 @SpringBootTest
-public class UserDaoTest {
+public class UserDaoTestEx {
 	
 	@Autowired
 	private UserDao dao; 
@@ -135,23 +135,7 @@ public class UserDaoTest {
 			dao.add(user1);
 		});
 	}
-	/*
-	@Test
-	public void sqlExceptionTranslate() {
-		dao.deleteAll();
-		
-		try {
-			dao.add(user1);
-			dao.add(user1);
-		}
-		catch(DuplicateKeyException ex) {
-			SQLException sqlEx = (SQLException)ex.getCause();
-			SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);			
-			DataAccessException transEx = set.translate(null, null, sqlEx);
-			assertThat(transEx, is(DuplicateKeyException.class));
-		}
-	}
-	*/
+	
 	@Test
 	public void update() {
 		dao.deleteAll();
