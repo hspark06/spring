@@ -1,5 +1,6 @@
 package com.ennio.main;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +9,7 @@ import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.TransientDataAccessResourceException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,6 +43,8 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @ExtendWith(SpringExtension.class) 
@@ -50,7 +54,6 @@ public class UserServiceTestEx {
 
     @Autowired UserService userService;	
     @Autowired UserDao userDao;
-	//@Autowired UserServiceImpl userServiceImpl;
 	@Autowired UserService testUserService;
 	@Autowired DataSource dataSource;
 	@Autowired MailSender mailSender; 
@@ -141,6 +144,14 @@ public class UserServiceTestEx {
 		checkLevelUpgraded(users.get(1), false);
 
 	}
+	
+	@Test
+	@Transactional
+	public void transactionSync() {
+		userService.deleteAll();
+		userService.add(users.get(0));
+		userService.add(users.get(1));
+	}
 
 	@Test
 	public void mockUpgradeLevels() throws Exception {
@@ -211,13 +222,27 @@ public class UserServiceTestEx {
 		public void send(SimpleMailMessage[] mailMessage) throws MailException {
 		}
 	}
+	@Test
+	public void voidreadOnlyTransactionAttribute() {
+		
+		//Assertions.assertThrows(TransientDataAccessResourceException.class, () -> {
+			testUserService.getAll();
+		 // });
+	}
 
-	static class TestUserServiceImpl extends UserServiceImpl {
+	static class TestUserService extends UserServiceImpl {
 		private String id = "madnite1"; // users(3).getId()
 		
 		protected void upgradeLevel(User user) {
 			if (user.getId().equals(this.id)) throw new TestUserServiceException();  
 			super.upgradeLevel(user);  
+		}
+
+		public List<User> getAll() {
+			for(User user : super.getAll()) {
+				super.update(user);
+			}
+			return null;
 		}
 	}
 

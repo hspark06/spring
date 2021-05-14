@@ -18,6 +18,9 @@
 		<property name="password" value="dsic" />
 	</bean>
 
+	<!-- aop -->
+	<tx:annotation-driven />
+	<!--
 	<aop:config>
 		<aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)" />
 	</aop:config>
@@ -28,9 +31,7 @@
 			<tx:method name="*" />
 		</tx:attributes> 
 	</tx:advice>
-
-
-	<!-- aop -->
+	-->
 	<!--
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
 
@@ -90,7 +91,7 @@
 		<property name="mailSender" ref="mailSender" />
 	</bean>
 
-	<bean id="testUserService" class="com.ennio.main.UserServiceTestEx$TestUserServiceImpl" parent="userService" />
+	<bean id="testUserService" class="com.ennio.main.UserServiceTestEx$TestUserService" parent="userService" />
 	
 	<bean id="mailSender" class="com.ennio.main.chapter4.service.DummyMailSender" />
 
